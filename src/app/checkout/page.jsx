@@ -8,10 +8,11 @@ import Link from "next/link";
 export default function Checkout() {
     const router = useRouter();
     const dispatch = useDispatch();
-    const { 
+    let { 
         deliveryAddresses, 
         loading, 
-        error 
+        error,
+        order
     } = useSelector((state) => state.products);
     
     const [selectedAddress, setSelectedAddress] = useState("");
@@ -41,6 +42,11 @@ export default function Checkout() {
             token
         }));
         setIsPlacingOrder(false);
+
+        setTimeout(()=>{
+            order = null;
+            router.push("/products");
+        }, [3000]);
     };
 
     if (loading) {
@@ -57,6 +63,22 @@ export default function Checkout() {
                 <div className="text-red-500 text-xl">{error}</div>
                 <Link href="/cart" className="mt-4 text-blue-500 hover:underline">
                     Back to Cart
+                </Link>
+            </div>
+        );
+    }
+
+    if (order) {
+        return (
+            <div className="container mx-auto px-4 py-8 text-center">
+                <h1 className="text-3xl font-bold mb-4">Order Placed Successfully!</h1>
+                <p className="text-xl mb-6">Your order number is: {order.order_num}</p>
+                <p className="text-lg mb-8">Total amount: ₹{order.grand_total.toFixed(2)}</p>
+                <Link 
+                    href="/products" 
+                    className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                    Back to Shopping
                 </Link>
             </div>
         );

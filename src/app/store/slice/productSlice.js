@@ -80,6 +80,15 @@ export const place_order = createAsyncThunk('products/placeOrder', async ({ paym
     return response;
 });
 
+export const get_user_info = createAsyncThunk('products/getUserInfo', async (token) => {
+    const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
+    const url = 'http://localhost:5000/v1/user/info';
+
+    const response = await secureFetch(url, {}, 'GET', api_key, token);
+    console.log("User Info Response: ", response);
+    return response;
+});
+
 const initialState = {
     user: null,
     token: null,
@@ -89,6 +98,7 @@ const initialState = {
     cuurentProd: null,
     deliveryAddresses: null,
     order: null,
+    userInfo: null,
     error: null,
     loading: false,
 };
@@ -241,6 +251,23 @@ const prodSlice = createSlice({
             }
         })
         .addCase(place_order.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.error.message;
+        }).addCase(get_user_info.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(get_user_info.fulfilled, (state, action) => {
+            state.loading = false;
+            if (action.payload?.code === 200) {
+                state.userInfo = action.payload.data;
+                state.error = null;
+            } else {
+                state.userInfo = null;
+                state.error = action.payload?.message || "Failed to load user info";
+            }
+        })
+        .addCase(get_user_info.rejected, (state, action) => {
             state.loading = false;
             state.error = action.error.message;
         })
