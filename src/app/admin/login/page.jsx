@@ -2,9 +2,10 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
-import { login } from '../store/slice/adminSlice';
+import { login } from '../../store/slice/adminSlice';
 import { useRouter } from "next/navigation";
 import { useState } from 'react';
+import Link from "next/link";
 
 const LoginForm = () => {
     const dispatch = useDispatch();
@@ -28,10 +29,8 @@ const LoginForm = () => {
         try {
             const response = await dispatch(login(values)).unwrap();
             if (response?.code === 200) {
-                const token = response.data.user_token;
-                localStorage.setItem('token', JSON.stringify(token));
                 setSuccess(true);
-                router.push('/products');
+                router.push('/admin/dashboard');
             } else {
                 setError(response?.message || 'Login failed');
             }
@@ -76,6 +75,8 @@ const LoginForm = () => {
                     </Form>
                 )}
             </Formik>
+
+            <Link className="mt-4 mr-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded transition-colors duration-300" href={`/login`}>Login As User</Link>
         </div>
     );
 };

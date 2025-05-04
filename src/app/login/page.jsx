@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { login } from '../store/slice/productSlice';
 import { useRouter } from "next/navigation";
 import { useState } from 'react';
+import Link from "next/link";
 
 const LoginForm = () => {
     const dispatch = useDispatch();
@@ -76,6 +77,8 @@ const LoginForm = () => {
                     </Form>
                 )}
             </Formik>
+
+            <Link className="mt-8 mr-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded transition-colors duration-300" href={`/admin/login`}>Login As Admin</Link>
         </div>
     );
 };
