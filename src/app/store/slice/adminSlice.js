@@ -56,11 +56,48 @@ export const get_categories = createAsyncThunk('products/getCategories', async (
     return response;
 });
 
+
+export const get_products = createAsyncThunk('products/get_products', async (token) => {
+    const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
+    const url = 'http://localhost:5000/v1/admin/products';
+
+    const response = await secureFetch(url, {}, 'GET', api_key, token);
+    return response;
+});
+
+export const delete_products = createAsyncThunk('products/delete_products', async (request_data) => {
+    const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
+    const url = 'http://localhost:5000/v1/admin/delete-product';
+    const send_data = {
+        product_id: request_data.product_id
+    }
+    const response = await secureFetch(url, send_data, 'POST', api_key, request_data.token);
+    return response;
+});
+
+export const edit_products = createAsyncThunk('products/edit_products', async (request_data) => {
+    const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
+    const url = 'http://localhost:5000/v1/admin/edit-prod';
+
+    console.log(request_data);
+
+    const send_data = {
+        product_id: request_data.product_id,
+        product_name: request_data.product_name,
+        product_description: request_data.product_description,
+        product_price: request_data.product_price
+    }
+
+    const response = await secureFetch(url, send_data, 'POST', api_key, request_data.token);
+    return response;
+});
+
 const initialState = {
     admin: null,
     order: null,
     created_order: null,
     categories: null,
+    products: null,
     error: null,
     loading: false,
 };
@@ -152,6 +189,56 @@ const adminSlice = createSlice({
             .addCase(get_categories.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message;
+            })
+            .addCase(get_products.pending, (state) => {
+              state.loading = true;
+              state.error = null;
+            })
+            .addCase(get_products.fulfilled, (state, action) => {
+              state.loading = false;
+              if (action.payload?.code == 200) {
+                state.products = action.payload.data;
+                state.error = null;
+              } else {
+                state.products = null;
+                state.error = action.payload?.message || "Failed to load products";
+              }
+            })
+            .addCase(get_products.rejected, (state, action) => {
+              state.loading = false;
+              state.error = action.error.message;
+            })
+            .addCase(delete_products.pending, (state) => {
+              state.loading = true;
+              state.error = null;
+            })
+            .addCase(delete_products.fulfilled, (state, action) => {
+              state.loading = false;
+              if (action.payload?.code == 200) {
+                state.error = null;
+              } else {
+                state.error = action.payload?.message || "Failed to delete product";
+              }
+            })
+            .addCase(delete_products.rejected, (state, action) => {
+              state.loading = false;
+              state.error = action.error.message;
+            })
+            .addCase(edit_products.pending, (state) => {
+              state.loading = true;
+              state.error = null;
+            })
+            .addCase(edit_products.fulfilled, (state, action) => {
+              state.loading = false;
+              if (action.payload?.code == 200) {
+                state.error = null;
+              } else {
+                state.error = action.payload?.message || "Failed to update product";
+              }
+            })
+            .addCase(edit_products.rejected, (state, action) => {
+              state.loading = false;
+              state.error = action.error.message;
             })
     }
 
