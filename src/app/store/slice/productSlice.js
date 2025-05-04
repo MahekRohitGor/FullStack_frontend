@@ -98,6 +98,44 @@ export const logout = createAsyncThunk('products/logout', async (token) => {
     return response;
 });
 
+export const addAddress = createAsyncThunk('products/addAddress', async (data) => {
+    const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
+    const url = 'http://localhost:5000/v1/user/add-delivery-address';
+    const data_address = {
+        address_line: data.address_line,
+        city: data.city,
+        state: data.state,
+        pincode: data.pincode,
+        country: data.country
+    }
+    const response = await secureFetch(url, data_address, 'POST', api_key, data.token);
+    console.log("User Add Address Response: ", response);
+    return response;
+});
+
+export const get_categories = createAsyncThunk('products/getCategories', async (token) => {
+    const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
+    const url = 'http://localhost:5000/v1/user/categories';
+
+    const response = await secureFetch(url, {}, 'GET', api_key, token);
+    return response;
+});
+
+export const filter_products = createAsyncThunk('products/filterProducts', async (filtersToApply) => {
+    const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
+    const url = 'http://localhost:5000/v1/user/filter';
+    console.log("Here: ", filtersToApply);
+    const filters = {
+        search: filtersToApply.search.trim(),
+        category:filtersToApply.category ? filtersToApply.category : [],
+        max_price: filtersToApply.max_price ? Number(filtersToApply.max_price) : null,
+        page: 1
+    }
+
+    const response = await secureFetch(url, filters, 'POST', api_key, filtersToApply.token);
+    return response;
+});
+
 const initialState = {
     user: null,
     token: null,
@@ -106,8 +144,17 @@ const initialState = {
     cartItems: null,
     cuurentProd: null,
     deliveryAddresses: null,
+    addedAddress: null,
     order: null,
     userInfo: null,
+    categories: null,
+    filters: {
+        category: [],
+        search: '',
+        max_price: null,
+        page: 1
+    },
+    filteredProds: null,
     error: null,
     loading: false,
 };
@@ -116,6 +163,24 @@ const prodSlice = createSlice({
     name: 'products',
     initialState,
     reducers: {
+        resetOrder: (state) => {
+            state.order = null;
+        },
+        updateFilters: (state, action) => {
+            state.filters = {
+                ...state.filters,
+                ...action.payload
+            };
+        },
+        resetFilters: (state) => {
+            state.filters = {
+                category: [],
+                search: '',
+                max_price: null,
+                page: 1
+            };
+            state.filteredProds = null;
+        }
     },
     extraReducers: (builder) => {
         builder.addCase(signup.pending, (state) => {
@@ -284,10 +349,58 @@ const prodSlice = createSlice({
                 state.error = null;
             })
             .addCase(logout.fulfilled, (state, action) => {
+                state.order = null;
                 state.loading = false;
                 state.error = null;
             })
             .addCase(logout.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            }).addCase(addAddress.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(addAddress.fulfilled, (state, action) => {
+                state.addedAddress = action.payload.data;
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(addAddress.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            }).addCase(get_categories.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(get_categories.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload?.code == 200) {
+                    state.categories = action.payload.data;
+                    state.error = null;
+                } else {
+                    state.categories = null;
+                    state.error = action.payload?.message || "Failed to load categories";
+                }
+            })
+            .addCase(get_categories.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            })
+            .addCase(filter_products.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(filter_products.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload?.code == 200) {
+                    state.filteredProds = action.payload.data;
+                    state.error = null;
+                } else {
+                    state.filteredProds = null;
+                    state.error = action.payload?.message || "No products found";
+                }
+            })
+            .addCase(filter_products.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message;
             })
@@ -295,4 +408,5 @@ const prodSlice = createSlice({
 
 });
 
+export const { resetOrder, updateFilters, resetFilters } = prodSlice.actions;
 export default prodSlice.reducer;

@@ -61,9 +61,9 @@ function Signup() {
 
                         if (response?.code === 200) {
                             const token = response.data.user_token;
-                            localStorage.setItem("token", JSON.stringify(token));
+                            // localStorage.setItem("token", JSON.stringify(token));
                             setSuccess(true);
-                            router.push("/products");
+                            router.push("/login");
                         } else {
                             setError(response?.message || "Signup failed");
                         }

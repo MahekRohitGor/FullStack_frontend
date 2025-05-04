@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { get_delivery_address, place_order } from "../store/slice/productSlice";
+import { get_delivery_address, place_order, resetOrder } from "../store/slice/productSlice";
 import Link from "next/link";
 
 export default function Checkout() {
@@ -44,7 +44,7 @@ export default function Checkout() {
         setIsPlacingOrder(false);
 
         setTimeout(()=>{
-            order = null;
+            dispatch(resetOrder());
             router.push("/products");
         }, [3000]);
     };
@@ -116,7 +116,7 @@ export default function Checkout() {
                 )}
 
                 <Link 
-                    href="/account/addresses" 
+                    href="/address" 
                     className="mt-3 inline-block text-blue-500 hover:underline text-sm"
                 >
                     + Add New Address
