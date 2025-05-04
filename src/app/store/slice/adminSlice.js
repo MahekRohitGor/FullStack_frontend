@@ -35,7 +35,7 @@ export const update_status = createAsyncThunk('admin/update_status', async (requ
 
 export const create_order = createAsyncThunk('admin/create_order', async (request_data) => {
     const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
-    const url = 'http://localhost:5000/v1/admin/update-status';
+    const url = 'http://localhost:5000/v1/admin/create-product';
     const send_data = {
         product_name: request_data.product_name,
         product_price: request_data.product_price,
@@ -48,9 +48,19 @@ export const create_order = createAsyncThunk('admin/create_order', async (reques
     return response;
 });
 
+export const get_categories = createAsyncThunk('products/getCategories', async (token) => {
+    const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
+    const url = 'http://localhost:5000/v1/user/categories';
+
+    const response = await secureFetch(url, {}, 'GET', api_key, token);
+    return response;
+});
+
 const initialState = {
     admin: null,
     order: null,
+    created_order: null,
+    categories: null,
     error: null,
     loading: false,
 };
@@ -75,41 +85,74 @@ const adminSlice = createSlice({
                 state.error = action.payload?.message || "Login failed";
             }
         })
-        .addCase(login.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.error.message;
-        }).addCase(orders.pending, (state) => {
-            state.loading = true;
-            state.error = null;
-        }).addCase(orders.fulfilled, (state, action) => {
-            state.loading = false;
-            console.log(action.payload.code);
-            if (action.payload?.code == 200) {
-                state.order = action.payload.data;
+            .addCase(login.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            }).addCase(orders.pending, (state) => {
+                state.loading = true;
                 state.error = null;
-            } else {
-                state.admin = null;
-                state.error = action.payload?.message || "Orders Fetch failed";
-            }
-        })
-        .addCase(orders.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.error.message;
-        }).addCase(update_status.pending, (state) => {
-            state.loading = true;
-            state.error = null;
-        }).addCase(update_status.fulfilled, (state, action) => {
-            state.loading = false;
-            if (action.payload?.code == 200) {
+            }).addCase(orders.fulfilled, (state, action) => {
+                state.loading = false;
+                console.log(action.payload.code);
+                if (action.payload?.code == 200) {
+                    state.order = action.payload.data;
+                    state.error = null;
+                } else {
+                    state.admin = null;
+                    state.error = action.payload?.message || "Orders Fetch failed";
+                }
+            })
+            .addCase(orders.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            }).addCase(update_status.pending, (state) => {
+                state.loading = true;
                 state.error = null;
-            } else {
-                state.error = action.payload?.message || "Status Update failed";
-            }
-        })
-        .addCase(update_status.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.error.message;
-        })
+            }).addCase(update_status.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload?.code == 200) {
+                    state.error = null;
+                } else {
+                    state.error = action.payload?.message || "Status Update failed";
+                }
+            })
+            .addCase(update_status.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            }).addCase(create_order.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            }).addCase(create_order.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload?.code == 200) {
+                    state.created_order = action.payload.data;
+                    state.error = null;
+                } else {
+                    state.created_order = null;
+                    state.error = action.payload?.message || "Status Update failed";
+                }
+            })
+            .addCase(create_order.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            }).addCase(get_categories.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(get_categories.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload?.code == 200) {
+                    state.categories = action.payload.data;
+                    state.error = null;
+                } else {
+                    state.categories = null;
+                    state.error = action.payload?.message || "Failed to load categories";
+                }
+            })
+            .addCase(get_categories.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            })
     }
 
 });
