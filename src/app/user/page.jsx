@@ -54,7 +54,8 @@ export default function UserProfile() {
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-8">User Profile</h1>
             <Link href={"/products"} className="px-4 py-2 bg-blue-100 text-blue-950 rounded-xl hover:bg-blue-200">Back to Shopping</Link>
-            
+            <Link href={"/user/edit"} className="ml-4 px-4 py-2 bg-blue-100 text-blue-950 rounded-xl hover:bg-blue-200">Edit Profile</Link>
+
             <div className="grid grid-row-1 md:grid-row-2 gap-8 mt-6">
                 <div className="bg-white rounded-lg shadow-lg p-6">
                     <h2 className="text-xl font-semibold mb-4">Personal Information</h2>

@@ -1,12 +1,9 @@
 import { createCipheriv, createDecipheriv } from 'crypto';
 
 export function encrypt(request_data) {
-    console.log("Req Data: ", request_data);
     if ( !request_data) return '';
     const iv = Buffer.from(process.env.NEXT_PUBLIC_HASH_IV, 'hex');
     const key = Buffer.from(process.env.NEXT_PUBLIC_HASH_KEY, 'hex');
-    console.log("IV: ", iv);
-    console.log("Key: ", key);
     try {
         const data = typeof request_data === 'object' ? JSON.stringify(request_data) : request_data;
         const cipher = createCipheriv('AES-256-CBC', key, iv);
@@ -20,11 +17,8 @@ export function encrypt(request_data) {
 }
 
 export function decrypt(request_data) {
-    console.log("Req dec Data: ", request_data);
     const iv = Buffer.from(process.env.NEXT_PUBLIC_HASH_IV, 'hex');
-    console.log("before key")
     const key = Buffer.from(process.env.NEXT_PUBLIC_HASH_KEY, 'hex');
-    console.log(request_data);
     try {
         if (!request_data) return {};
         console.log('Request Data to Decrypt:', request_data);

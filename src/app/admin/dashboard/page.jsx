@@ -43,6 +43,13 @@ export default function Dashboard() {
                         >
                             Manage Products
                         </Link>
+
+                        <Link 
+                            href="/admin/users"
+                            className="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg shadow hover:shadow-md transition duration-200"
+                        >
+                            Manage Users
+                        </Link>
                     </div>
                 </div>
             </div>

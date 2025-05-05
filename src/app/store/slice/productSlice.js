@@ -136,6 +136,20 @@ export const filter_products = createAsyncThunk('products/filterProducts', async
     return response;
 });
 
+export const edit_profile = createAsyncThunk('products/editProfile', async (request_data) => {
+    const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
+    const url = 'http://localhost:5000/v1/user/edit';
+    console.log("Here in edit profile: ", request_data);
+    const send_data = {
+        full_name: request_data.full_name,
+        about: request_data.about,
+        profile_picture: request_data.profile_picture
+    }
+
+    const response = await secureFetch(url, send_data, 'POST', api_key, request_data.token);
+    return response;
+});
+
 const initialState = {
     user: null,
     token: null,
@@ -401,6 +415,21 @@ const prodSlice = createSlice({
                 }
             })
             .addCase(filter_products.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            }).addCase(edit_profile.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(edit_profile.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload?.code == 200) {
+                    state.error = null;
+                } else {
+                    state.error = action.payload?.message || "Error in Update Profile";
+                }
+            })
+            .addCase(edit_profile.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message;
             })

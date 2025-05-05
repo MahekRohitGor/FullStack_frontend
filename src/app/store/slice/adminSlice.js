@@ -92,12 +92,39 @@ export const edit_products = createAsyncThunk('products/edit_products', async (r
     return response;
 });
 
+export const get_users = createAsyncThunk('products/get_users', async (token) => {
+    const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
+    const url = 'http://localhost:5000/v1/admin/users';
+
+    const response = await secureFetch(url, {}, 'GET', api_key, token);
+    return response;
+});
+
+export const edit_user = createAsyncThunk('products/edit_user', async (request_data) => {
+    const api_key = "b77aa44e2f6b79a09835de8f4cc84dac";
+    const url = `http://localhost:5000/v1/admin/update-profile/${request_data.user_id}`;
+
+    console.log(request_data);
+
+    const send_data = {
+        full_name: request_data.full_name,
+        profile_pic: request_data.profile_pic,
+        about: request_data.about,
+        is_active: request_data.is_active,
+        email_id: request_data.email_id
+    }
+
+    const response = await secureFetch(url, send_data, 'PUT', api_key, request_data.token);
+    return response;
+});
+
 const initialState = {
     admin: null,
     order: null,
     created_order: null,
     categories: null,
     products: null,
+    users: null,
     error: null,
     loading: false,
 };
@@ -239,7 +266,40 @@ const adminSlice = createSlice({
             .addCase(edit_products.rejected, (state, action) => {
               state.loading = false;
               state.error = action.error.message;
-            })
+            }).addCase(get_users.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+              })
+              .addCase(get_users.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload?.code == 200) {
+                  state.users = action.payload.data;
+                  state.error = null;
+                } else {
+                  state.users = null;
+                  state.error = action.payload?.message || "Failed to get user";
+                }
+              })
+              .addCase(get_users.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+              })
+              .addCase(edit_user.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+              })
+              .addCase(edit_user.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload?.code == 200) {
+                  state.error = null;
+                } else {
+                  state.error = action.payload?.message || "Failed to update user";
+                }
+              })
+              .addCase(edit_user.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+              })
     }
 
 });
